@@ -1,0 +1,17 @@
+# Django CRUD API - Dependencias principales
+# Actualizado: 2025-01-17
+
+# Framework principal
+Django==5.2.8
+
+# Django REST Framework
+djangorestframework==3.16.1
+
+# CORS headers para permitir peticiones cross-origin
+django-cors-headers==4.9.0
+
+# Core API para documentación automática
+coreapi==2.3.3
+
+# Nota: Las dependencias transitivas (asgiref, sqlparse, etc.)
+# se instalarán automáticamente por pip
