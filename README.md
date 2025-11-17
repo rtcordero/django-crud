@@ -6,6 +6,8 @@ API REST desarrollada con Django y Django REST Framework para la gestión de tar
 
 Este proyecto implementa una API RESTful completa para gestionar tareas, permitiendo realizar operaciones CRUD (Crear, Leer, Actualizar, Eliminar) sobre un modelo de tareas. La API incluye documentación automática y está configurada con CORS para integrarse con aplicaciones frontend.
 
+> 🚀 **¿Quieres empezar YA?** Consulta [INICIO_RAPIDO.md](INICIO_RAPIDO.md) - ¡En marcha en 5 minutos!
+
 > 🎓 **¿Nuevo en Django?** Consulta la [Guía Visual para Principiantes](GUIA_VISUAL.md) para entender cómo funciona el código paso a paso.
 
 ## 🚀 Características
@@ -77,14 +79,52 @@ La API estará disponible en `http://localhost:8000`
    - Abre tu navegador en `http://localhost:8000/tasks/api/v1/tasks/`
    - Deberías ver la interfaz de Django REST Framework con una lista vacía
 
-2. **Ver la documentación:**
-   - Visita `http://localhost:8000/tasks/docs/`
-   - Aquí encontrarás la documentación interactiva de la API
+2. **Ver la documentación interactiva:**
+   - **Swagger UI:** `http://localhost:8000/tasks/swagger/` - Interfaz moderna para probar la API
+   - **ReDoc:** `http://localhost:8000/tasks/redoc/` - Documentación elegante y profesional
+   - **Schema:** `http://localhost:8000/tasks/schema/` - OpenAPI 3.0 schema en JSON/YAML
 
 3. **Probar el admin:**
    - Ve a `http://localhost:8000/admin/`
    - Inicia sesión con tu superusuario
    - Crea algunas tareas de prueba
+
+> 📖 **Guía completa de Swagger:** Consulta [SWAGGER_GUIDE.md](SWAGGER_GUIDE.md) para aprender a usar la documentación interactiva.
+
+## 🎨 Documentación Interactiva (Swagger / OpenAPI 3.0)
+
+El proyecto incluye **documentación interactiva** generada automáticamente con **drf-spectacular**, la mejor herramienta actual para Django REST Framework.
+
+### 🚀 URLs de Documentación
+
+Una vez el servidor esté ejecutándose:
+
+| URL | Descripción | Mejor para |
+|-----|-------------|------------|
+| [`/tasks/swagger/`](http://localhost:8000/tasks/swagger/) | **Swagger UI** - Interfaz interactiva moderna | Testing y desarrollo |
+| [`/tasks/redoc/`](http://localhost:8000/tasks/redoc/) | **ReDoc** - Documentación elegante | Presentaciones y clientes |
+| [`/tasks/schema/`](http://localhost:8000/tasks/schema/) | **OpenAPI 3.0 Schema** | Importar a otras herramientas |
+
+### ✨ Características
+
+- ✅ **Interfaz moderna** estilo Swagger
+- ✅ **Prueba endpoints** directamente desde el navegador
+- ✅ **Ejemplos de requests** pre-cargados
+- ✅ **OpenAPI 3.0** (estándar de la industria)
+- ✅ **Documentación rica** con descripciones y validaciones
+- ✅ **2 interfaces** (Swagger UI + ReDoc)
+
+### 💡 Ejemplo de uso
+
+1. Abre **Swagger UI:** `http://localhost:8000/tasks/swagger/`
+2. Haz clic en `POST /tasks/api/v1/tasks/`
+3. Click en **"Try it out"**
+4. Edita el JSON y haz click en **"Execute"**
+5. ¡Ves la respuesta inmediatamente!
+
+**Sin escribir código**, puedes probar toda la API interactivamente.
+
+> 📚 **Guía completa:** [SWAGGER_GUIDE.md](SWAGGER_GUIDE.md) - Aprende a usar Swagger UI, ReDoc y personalizar la documentación.
 
 ## 📚 Estructura del Proyecto
 
@@ -585,6 +625,12 @@ Los errores aparecen en la consola donde ejecutaste `runserver`. Para logs más 
 ### 📚 Documentación del proyecto
 
 #### Para probar la API:
+- **[Guía de Swagger/OpenAPI](SWAGGER_GUIDE.md)** ⭐ **NUEVO**
+  - Cómo usar Swagger UI y ReDoc
+  - Comparación con alternativas (drf-yasg, CoreAPI)
+  - Personalización y configuración
+  - Testing interactivo desde el navegador
+  
 - **[Guía de Postman](POSTMAN_GUIDE.md)** 
   - Cómo importar y usar la colección
   - Guía completa de cada endpoint

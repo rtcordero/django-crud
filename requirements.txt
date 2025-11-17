@@ -10,8 +10,8 @@ djangorestframework==3.16.1
 # CORS headers para permitir peticiones cross-origin
 django-cors-headers==4.9.0
 
-# Core API para documentación automática
-coreapi==2.3.3
+# drf-spectacular para documentación OpenAPI 3.0 / Swagger
+drf-spectacular==0.29.0
 
-# Nota: Las dependencias transitivas (asgiref, sqlparse, etc.)
+# Nota: Las dependencias transitivas (asgiref, sqlparse, PyYAML, etc.)
 # se instalarán automáticamente por pip
