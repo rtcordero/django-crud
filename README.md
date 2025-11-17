@@ -6,6 +6,8 @@ API REST desarrollada con Django y Django REST Framework para la gestión de tar
 
 Este proyecto implementa una API RESTful completa para gestionar tareas, permitiendo realizar operaciones CRUD (Crear, Leer, Actualizar, Eliminar) sobre un modelo de tareas. La API incluye documentación automática y está configurada con CORS para integrarse con aplicaciones frontend.
 
+> 🎓 **¿Nuevo en Django?** Consulta la [Guía Visual para Principiantes](GUIA_VISUAL.md) para entender cómo funciona el código paso a paso.
+
 ## 🚀 Características
 
 - ✅ API REST completa con Django REST Framework
@@ -69,6 +71,21 @@ python manage.py runserver
 
 La API estará disponible en `http://localhost:8000`
 
+### ✅ Verificar que todo funciona
+
+1. **Verificar el servidor:**
+   - Abre tu navegador en `http://localhost:8000/tasks/api/v1/tasks/`
+   - Deberías ver la interfaz de Django REST Framework con una lista vacía
+
+2. **Ver la documentación:**
+   - Visita `http://localhost:8000/tasks/docs/`
+   - Aquí encontrarás la documentación interactiva de la API
+
+3. **Probar el admin:**
+   - Ve a `http://localhost:8000/admin/`
+   - Inicia sesión con tu superusuario
+   - Crea algunas tareas de prueba
+
 ## 📚 Estructura del Proyecto
 
 ```
@@ -86,6 +103,150 @@ django-crud/
 ├── db.sqlite3                # Base de datos SQLite
 ├── manage.py                 # Script de gestión de Django
 └── README.md                 # Este archivo
+```
+
+## 🏗️ Arquitectura y Flujo de Datos
+
+### Cómo interactúan los componentes
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         CLIENTE (Frontend/curl)                  │
+└────────────────────────────────┬────────────────────────────────┘
+                                 │ HTTP Request
+                                 ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    django_crud_api/urls.py                       │
+│              (Enrutador principal del proyecto)                  │
+│         path('tasks/', include('tasks.urls'))                    │
+└────────────────────────────────┬────────────────────────────────┘
+                                 │
+                                 ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                        tasks/urls.py                             │
+│              (Enrutador de la app de tareas)                     │
+│    router.register(r'tasks', TaskView, 'tasks')                  │
+└────────────────────────────────┬────────────────────────────────┘
+                                 │
+                                 ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                        tasks/views.py                            │
+│              TaskView(viewsets.ModelViewSet)                     │
+│          - Gestiona las peticiones HTTP                          │
+│          - Define las operaciones CRUD                           │
+└────────────────┬────────────────────────────┬───────────────────┘
+                 │                            │
+                 │ Usa                        │ Usa
+                 ▼                            ▼
+┌──────────────────────────────┐  ┌──────────────────────────────┐
+│   tasks/serializer.py        │  │     tasks/models.py          │
+│   TaskSerializer             │  │     Task Model               │
+│   - Convierte datos entre    │  │     - Define estructura      │
+│     JSON y modelo Python     │◄─┤       de la tabla            │
+│   - Valida datos             │  │     - Interactúa con DB      │
+└──────────────────────────────┘  └────────────┬─────────────────┘
+                                               │
+                                               │ ORM
+                                               ▼
+                                  ┌─────────────────────────┐
+                                  │     db.sqlite3          │
+                                  │   (Base de datos)       │
+                                  └─────────────────────────┘
+```
+
+### Flujo de una petición típica (Ejemplo: GET /tasks/api/v1/tasks/)
+
+1. **Cliente** → Hace una petición HTTP GET a `/tasks/api/v1/tasks/`
+
+2. **django_crud_api/urls.py** → Recibe la petición y la redirige a `tasks.urls`
+
+3. **tasks/urls.py** → El router identifica que debe usar `TaskView` para `/tasks/`
+
+4. **tasks/views.py (TaskView)** → 
+   - Ejecuta el método `list()` (heredado de ModelViewSet)
+   - Consulta `Task.objects.all()` al modelo
+
+5. **tasks/models.py (Task)** → 
+   - Django ORM traduce la consulta a SQL
+   - Recupera los datos de `db.sqlite3`
+
+6. **tasks/serializer.py (TaskSerializer)** → 
+   - Convierte los objetos Python en formato JSON
+   - Valida y estructura los datos
+
+7. **Respuesta** → Los datos JSON se envían de vuelta al cliente
+
+### Componentes clave explicados
+
+#### 🗂️ models.py (Modelo de Datos)
+```python
+class Task(models.Model):
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    done = models.BooleanField(default=False)
+```
+**Función**: Define la estructura de la tabla en la base de datos. Cada atributo es una columna.
+
+#### 🔄 serializer.py (Traductor)
+```python
+class TaskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Task
+        fields = ['id', 'title', 'description', 'done']
+```
+**Función**: Convierte entre objetos Python (Task) y JSON. Valida los datos de entrada/salida.
+
+#### 🎮 views.py (Controlador)
+```python
+class TaskView(viewsets.ModelViewSet):
+    serializer_class = TaskSerializer
+    queryset = Task.objects.all()
+```
+**Función**: Gestiona la lógica de negocio. ModelViewSet incluye automáticamente:
+- `list()` → GET /tasks/ (listar todas)
+- `create()` → POST /tasks/ (crear nueva)
+- `retrieve()` → GET /tasks/1/ (obtener una)
+- `update()` → PUT /tasks/1/ (actualizar completa)
+- `partial_update()` → PATCH /tasks/1/ (actualizar parcial)
+- `destroy()` → DELETE /tasks/1/ (eliminar)
+
+#### 🛣️ urls.py (Enrutador)
+```python
+router = routers.DefaultRouter()
+router.register(r'tasks', TaskView, 'tasks')
+```
+**Función**: Mapea las URLs a las vistas. El router automáticamente crea todas las rutas necesarias.
+
+### Ejemplo práctico: Crear una tarea
+
+**1. Cliente envía:**
+```bash
+POST /tasks/api/v1/tasks/
+Content-Type: application/json
+
+{
+  "title": "Estudiar Django",
+  "description": "Completar tutorial",
+  "done": false
+}
+```
+
+**2. Flujo interno:**
+- URLs → Enruta a `TaskView.create()`
+- Serializer → Valida el JSON
+- View → Llama a `Task.objects.create()`
+- Model → Inserta en la base de datos
+- Serializer → Convierte el objeto guardado a JSON
+- Response → Devuelve status 201 con los datos
+
+**3. Respuesta al cliente:**
+```json
+{
+  "id": 1,
+  "title": "Estudiar Django",
+  "description": "Completar tutorial",
+  "done": false
+}
 ```
 
 ## 📦 Gestión de Dependencias
@@ -220,6 +381,86 @@ curl -X PUT http://localhost:8000/tasks/api/v1/tasks/1/ \
 curl -X DELETE http://localhost:8000/tasks/api/v1/tasks/1/
 ```
 
+## 📮 Colección de Postman
+
+El proyecto incluye una colección completa de Postman para probar todos los endpoints de la API fácilmente.
+
+### 📥 Importar la colección
+
+1. **Abre Postman**
+2. **Haz clic en "Import"** (botón en la esquina superior izquierda)
+3. **Selecciona el archivo** `postman_collection.json` de este repositorio
+4. **¡Listo!** La colección aparecerá en tu sidebar
+
+### 🎯 Contenido de la colección
+
+#### **Tasks CRUD** (6 endpoints principales)
+1. ✅ **Listar todas las tareas** - GET con tests automáticos
+2. ✅ **Crear nueva tarea** - POST (guarda el ID automáticamente)
+3. ✅ **Obtener una tarea específica** - GET con validación
+4. ✅ **Actualizar tarea completa** - PUT con todos los campos
+5. ✅ **Actualizar tarea parcial** - PATCH solo campos específicos
+6. ✅ **Eliminar tarea** - DELETE con confirmación
+
+#### **Examples - Casos de uso** (4 ejemplos)
+- Crear tarea sin descripción
+- Marcar tarea como completada
+- Cambiar solo el título
+- Crear múltiples tareas (con datos aleatorios)
+
+#### **Error Cases - Validaciones** (3 casos de prueba)
+- Error: Título vacío (400)
+- Error: Tarea no encontrada (404)
+- Error: Título muy largo (400)
+
+### ⚙️ Variables incluidas
+
+La colección incluye estas variables configuradas:
+- `base_url`: `http://localhost:8000` (editable)
+- `task_id`: Se actualiza automáticamente al crear una tarea
+
+### 🚀 Cómo usar la colección
+
+1. **Inicia el servidor Django:**
+   ```bash
+   python manage.py runserver
+   ```
+
+2. **Ejecuta las peticiones en orden:**
+   - Primero "Listar todas las tareas" para ver el estado inicial
+   - Luego "Crear nueva tarea" (guarda el ID automáticamente)
+   - Las demás peticiones usarán el ID guardado
+
+3. **Tests automáticos:**
+   - Cada petición incluye tests que se ejecutan automáticamente
+   - Ve los resultados en la pestaña "Test Results"
+   - Los tests validan códigos de estado, estructura de respuesta, etc.
+
+### 💡 Características especiales
+
+- ✅ **Tests automáticos** en cada endpoint
+- ✅ **Variables dinámicas** - El ID se guarda automáticamente
+- ✅ **Documentación completa** en cada petición
+- ✅ **Ejemplos de body** para cada operación
+- ✅ **Casos de error** para testing de validaciones
+- ✅ **Datos aleatorios** con `{{$randomInt}}` para testing
+
+### 📝 Ejemplo de uso rápido
+
+1. Importa la colección
+2. Ejecuta "Crear nueva tarea"
+3. El `task_id` se guarda automáticamente
+4. Ejecuta cualquier otra petición - usará el ID guardado
+5. Ve los tests pasar en verde ✅
+
+### 🔄 Cambiar el servidor
+
+Si tu servidor Django está en otro puerto o dominio:
+
+1. Haz clic en la colección
+2. Ve a la pestaña "Variables"
+3. Cambia `base_url` a tu URL (ej: `http://localhost:8080`)
+
 ## 🔧 Configuración
 
 ### CORS
@@ -266,6 +507,116 @@ Las contribuciones son bienvenidas. Por favor:
 3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
 4. Push a la rama (`git push origin feature/AmazingFeature`)
 5. Abre un Pull Request
+
+## ❓ Preguntas Frecuentes
+
+### ¿Cómo añado un nuevo campo al modelo Task?
+
+1. Edita `tasks/models.py` y añade el campo:
+```python
+class Task(models.Model):
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    done = models.BooleanField(default=False)
+    priority = models.IntegerField(default=1)  # Nuevo campo
+```
+
+2. Actualiza el serializador en `tasks/serializer.py`:
+```python
+fields = ['id', 'title', 'description', 'done', 'priority']
+```
+
+3. Crea y aplica la migración:
+```bash
+python manage.py makemigrations
+python manage.py migrate
+```
+
+### ¿Cómo cambio el puerto del servidor?
+
+```bash
+python manage.py runserver 8080
+# O especifica también la IP
+python manage.py runserver 0.0.0.0:8080
+```
+
+### ¿Por qué no funciona CORS con mi frontend?
+
+Añade el origen de tu frontend en `settings.py`:
+```python
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # Tu frontend
+]
+```
+
+### ¿Cómo añado autenticación a la API?
+
+Django REST Framework incluye varios tipos de autenticación. En `settings.py`:
+```python
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ]
+}
+```
+
+### ¿Cómo limpio la base de datos?
+
+```bash
+# Opción 1: Eliminar y recrear
+rm db.sqlite3
+python manage.py migrate
+
+# Opción 2: Usar la shell de Django
+python manage.py shell
+>>> from tasks.models import Task
+>>> Task.objects.all().delete()
+```
+
+### ¿Dónde veo los logs de errores?
+
+Los errores aparecen en la consola donde ejecutaste `runserver`. Para logs más detallados, configura logging en `settings.py`.
+
+## 🔗 Recursos Adicionales
+
+### 📚 Documentación del proyecto
+
+#### Para probar la API:
+- **[Guía de Postman](POSTMAN_GUIDE.md)** 
+  - Cómo importar y usar la colección
+  - Guía completa de cada endpoint
+  - Variables y tests automáticos
+  - Casos de uso y ejercicios prácticos
+
+#### Para principiantes:
+- **[Guía Visual para Principiantes](GUIA_VISUAL.md)** 
+  - Explicación detallada de cada archivo y su función
+  - Flujo completo de peticiones paso a paso
+  - Cómo funciona el ORM de Django
+  - Ejemplos prácticos y ejercicios
+
+#### Para consulta rápida:
+- **[Referencia Rápida](REFERENCIA_RAPIDA.md)** 
+  - Cheat sheet con diagramas ASCII
+  - Comandos Django más usados
+  - Queries comunes del ORM
+  - Solución a errores comunes
+
+#### Para entender el flujo detallado:
+- **[Diagramas de Secuencia](DIAGRAMAS_SECUENCIA.md)** 
+  - Flujo detallado de cada operación CRUD
+  - Diagramas de secuencia para GET, POST, PUT, PATCH, DELETE
+  - Códigos HTTP explicados
+  - Tips para debugging
+
+### 🌐 Documentación oficial
+- [Documentación de Django](https://docs.djangoproject.com/)
+- [Documentación de Django REST Framework](https://www.django-rest-framework.org/)
+- [Tutorial oficial de Django](https://docs.djangoproject.com/en/5.2/intro/tutorial01/)
+- [Guía de Django REST Framework](https://www.django-rest-framework.org/tutorial/quickstart/)
 
 ## 📞 Contacto
 
