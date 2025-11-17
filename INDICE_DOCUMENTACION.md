@@ -4,9 +4,19 @@ Bienvenido al proyecto Django CRUD API. Esta documentación está organizada par
 
 ## 🗺️ Guía de Navegación
 
-### 🎯 Empieza aquí
+### 🚀 Empieza aquí
 
-1. **[README.md](README.md)** - Tu punto de partida principal
+**¿Primera vez con el proyecto?**
+
+👉 **Lee primero:** [INICIO_RAPIDO.md](INICIO_RAPIDO.md) - ¡En marcha en 5 minutos!
+   - Instalación rápida
+   - Primer test de la API
+   - URLs principales
+   - Solución rápida de problemas
+
+### 🎯 Después, continúa con:
+
+1. **[README.md](README.md)** - Tu punto de partida completo
    - Descripción del proyecto
    - Instalación paso a paso
    - Arquitectura y flujo de datos
@@ -46,8 +56,19 @@ Bienvenido al proyecto Django CRUD API. Esta documentación está organizada par
 │   ├── Arquitectura visual
 │   ├── Componentes explicados
 │   ├── Endpoints de la API
+│   ├── Documentación interactiva (Swagger)
 │   ├── Colección de Postman
 │   └── Gestión de dependencias
+│
+├── 🎨 SWAGGER_GUIDE.md             → Guía de Swagger/OpenAPI 3.0 ⭐ NUEVO
+│   ├── ¿Por qué drf-spectacular?
+│   ├── Acceder a la documentación
+│   ├── Swagger UI - Guía de uso
+│   ├── ReDoc - Guía de uso
+│   ├── Características implementadas
+│   ├── Casos de uso
+│   ├── Personalización
+│   └── Comparación con alternativas
 │
 ├── 📮 postman_collection.json      → Colección de Postman
 │   ├── 6 endpoints CRUD principales
@@ -114,7 +135,9 @@ Bienvenido al proyecto Django CRUD API. Esta documentación está organizada par
 | Pregunta | Documento | Sección |
 |----------|-----------|---------|
 | ¿Cómo instalo el proyecto? | README.md | Instalación |
-| ¿Cómo pruebo la API? | postman_collection.json + README.md | Colección de Postman |
+| ¿Cómo pruebo la API interactivamente? | SWAGGER_GUIDE.md ⭐ | Swagger UI |
+| ¿Cómo uso Swagger? | SWAGGER_GUIDE.md ⭐ | Guía de uso |
+| ¿Cómo pruebo la API con Postman? | postman_collection.json + POSTMAN_GUIDE.md | Colección de Postman |
 | ¿Qué hace cada archivo? | GUIA_VISUAL.md | ¿Qué hace cada archivo? |
 | ¿Cómo funciona una petición GET? | DIAGRAMAS_SECUENCIA.md | GET - Listar tareas |
 | ¿Cómo filtro tareas pendientes? | REFERENCIA_RAPIDA.md | Queries comunes |

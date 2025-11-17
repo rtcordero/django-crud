@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
-    'coreapi',
+    'drf_spectacular',  # OpenAPI 3.0 schema generation
     'tasks',
 ]
 
@@ -129,6 +129,50 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # CORS configuration
 CORS_ALLOWED_ORIGINS = []
 
+# REST Framework configuration
 REST_FRAMEWORK = {
-    "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema",
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+# drf-spectacular settings
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Django CRUD API - Tasks',
+    'DESCRIPTION': '''
+    API REST completa para la gestión de tareas (To-Do List).
+    
+    ## Características
+    - Operaciones CRUD completas (Crear, Leer, Actualizar, Eliminar)
+    - Validación de datos
+    - Filtrado y búsqueda
+    - Documentación interactiva
+    
+    ## Autenticación
+    Actualmente no requiere autenticación (para desarrollo).
+    
+    ## Endpoints principales
+    - `GET /tasks/api/v1/tasks/` - Listar todas las tareas
+    - `POST /tasks/api/v1/tasks/` - Crear nueva tarea
+    - `GET /tasks/api/v1/tasks/{id}/` - Obtener una tarea
+    - `PUT /tasks/api/v1/tasks/{id}/` - Actualizar tarea completa
+    - `PATCH /tasks/api/v1/tasks/{id}/` - Actualizar tarea parcial
+    - `DELETE /tasks/api/v1/tasks/{id}/` - Eliminar tarea
+    ''',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'CONTACT': {
+        'name': 'API Support',
+        'email': 'support@example.com',
+    },
+    'LICENSE': {
+        'name': 'MIT License',
+    },
+    # Configuración de la UI
+    'SWAGGER_UI_SETTINGS': {
+        'deepLinking': True,
+        'persistAuthorization': True,
+        'displayOperationId': True,
+        'filter': True,
+    },
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SORT_OPERATIONS': False,
 }
