@@ -1,0 +1,632 @@
+{
+	"info": {
+		"_postman_id": "django-crud-api-tasks",
+		"name": "Django CRUD API - Tasks",
+		"description": "Colección completa de endpoints para la API de gestión de tareas.\n\n## 🚀 Endpoints disponibles:\n- Listar todas las tareas\n- Crear nueva tarea\n- Obtener una tarea específica\n- Actualizar tarea completa (PUT)\n- Actualizar tarea parcial (PATCH)\n- Eliminar tarea\n\n## 📝 Variables:\n- `base_url`: http://localhost:8000\n- `task_id`: ID de la tarea (se actualiza automáticamente después de crear)\n\n## 🎯 Cómo usar:\n1. Importa esta colección en Postman\n2. Asegúrate de que el servidor Django esté ejecutándose\n3. Ejecuta las peticiones en orden o individualmente\n\nVersión: 1.0.0\nFecha: 2025-01-17",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Tasks CRUD",
+			"item": [
+				{
+					"name": "1. Listar todas las tareas",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response is an array\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 500ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(500);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/tasks/api/v1/tasks/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tasks",
+								"api",
+								"v1",
+								"tasks",
+								""
+							]
+						},
+						"description": "Obtiene la lista completa de todas las tareas en el sistema.\n\n**Respuesta esperada:** Status 200 con un array de tareas.\n\n**Ejemplo de respuesta:**\n```json\n[\n    {\n        \"id\": 1,\n        \"title\": \"Comprar leche\",\n        \"description\": \"En el supermercado\",\n        \"done\": false\n    },\n    {\n        \"id\": 2,\n        \"title\": \"Estudiar Django\",\n        \"description\": \"Completar tutorial\",\n        \"done\": true\n    }\n]\n```"
+					},
+					"response": []
+				},
+				{
+					"name": "2. Crear nueva tarea",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Task created successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData).to.have.property('title');",
+									"    pm.expect(jsonData).to.have.property('done');",
+									"    ",
+									"    // Guardar el ID de la tarea creada para usarlo en otras peticiones",
+									"    pm.collectionVariables.set(\"task_id\", jsonData.id);",
+									"    console.log(\"Task ID guardado: \" + jsonData.id);",
+									"});",
+									"",
+									"pm.test(\"Response has correct structure\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.title).to.eql(\"Aprender Django REST Framework\");",
+									"    pm.expect(jsonData.done).to.eql(false);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Aprender Django REST Framework\",\n    \"description\": \"Completar el tutorial y crear una API funcional\",\n    \"done\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/tasks/api/v1/tasks/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tasks",
+								"api",
+								"v1",
+								"tasks",
+								""
+							]
+						},
+						"description": "Crea una nueva tarea en el sistema.\n\n**Body requerido:**\n```json\n{\n    \"title\": \"string\" (requerido, máx 200 caracteres),\n    \"description\": \"string\" (opcional),\n    \"done\": boolean (opcional, default: false)\n}\n```\n\n**Respuesta esperada:** Status 201 con la tarea creada (incluye el ID generado).\n\n**Nota:** El ID de la tarea creada se guarda automáticamente en la variable `task_id` para usar en otras peticiones."
+					},
+					"response": []
+				},
+				{
+					"name": "3. Obtener una tarea específica",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has correct structure\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData).to.have.property('title');",
+									"    pm.expect(jsonData).to.have.property('description');",
+									"    pm.expect(jsonData).to.have.property('done');",
+									"});",
+									"",
+									"pm.test(\"ID matches requested ID\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.id).to.eql(parseInt(pm.collectionVariables.get(\"task_id\")));",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/tasks/api/v1/tasks/{{task_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tasks",
+								"api",
+								"v1",
+								"tasks",
+								"{{task_id}}",
+								""
+							]
+						},
+						"description": "Obtiene los detalles de una tarea específica por su ID.\n\n**Parámetros:**\n- `task_id`: ID de la tarea (en la URL)\n\n**Respuesta esperada:** Status 200 con los datos de la tarea.\n\n**Errores posibles:**\n- 404: Tarea no encontrada\n\n**Ejemplo de respuesta:**\n```json\n{\n    \"id\": 1,\n    \"title\": \"Aprender Django\",\n    \"description\": \"Completar tutorial\",\n    \"done\": false\n}\n```"
+					},
+					"response": []
+				},
+				{
+					"name": "4. Actualizar tarea completa (PUT)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Task updated successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.title).to.eql(\"Aprender Django REST Framework - ACTUALIZADO\");",
+									"    pm.expect(jsonData.done).to.eql(true);",
+									"});",
+									"",
+									"pm.test(\"All fields are present\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData).to.have.property('title');",
+									"    pm.expect(jsonData).to.have.property('description');",
+									"    pm.expect(jsonData).to.have.property('done');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Aprender Django REST Framework - ACTUALIZADO\",\n    \"description\": \"Tutorial completado con éxito. API funcionando correctamente.\",\n    \"done\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/tasks/api/v1/tasks/{{task_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tasks",
+								"api",
+								"v1",
+								"tasks",
+								"{{task_id}}",
+								""
+							]
+						},
+						"description": "Actualiza TODOS los campos de una tarea existente.\n\n**Parámetros:**\n- `task_id`: ID de la tarea (en la URL)\n\n**Body requerido (TODOS los campos):**\n```json\n{\n    \"title\": \"string\" (requerido),\n    \"description\": \"string\" (requerido),\n    \"done\": boolean (requerido)\n}\n```\n\n**Diferencia entre PUT y PATCH:**\n- **PUT**: Reemplaza TODA la tarea (debes enviar todos los campos)\n- **PATCH**: Actualiza solo los campos que envías\n\n**Respuesta esperada:** Status 200 con la tarea actualizada."
+					},
+					"response": []
+				},
+				{
+					"name": "5. Actualizar tarea parcial (PATCH)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Task marked as done\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.done).to.eql(true);",
+									"});",
+									"",
+									"pm.test(\"Other fields preserved\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('title');",
+									"    pm.expect(jsonData).to.have.property('description');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"done\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/tasks/api/v1/tasks/{{task_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tasks",
+								"api",
+								"v1",
+								"tasks",
+								"{{task_id}}",
+								""
+							]
+						},
+						"description": "Actualiza SOLO los campos especificados de una tarea.\n\n**Parámetros:**\n- `task_id`: ID de la tarea (en la URL)\n\n**Body (solo los campos a actualizar):**\n```json\n{\n    \"done\": true\n}\n```\n\n**Ventajas de PATCH:**\n- Solo envías los campos que quieres cambiar\n- Útil para cambios pequeños (ej: marcar como completada)\n- Los demás campos se mantienen sin cambios\n\n**Respuesta esperada:** Status 200 con la tarea actualizada completa.\n\n**Casos de uso comunes:**\n- Marcar tarea como completada: `{\"done\": true}`\n- Cambiar título: `{\"title\": \"Nuevo título\"}`\n- Actualizar descripción: `{\"description\": \"Nueva descripción\"}`"
+					},
+					"response": []
+				},
+				{
+					"name": "6. Eliminar tarea",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204\", function () {",
+									"    pm.response.to.have.status(204);",
+									"});",
+									"",
+									"pm.test(\"Response body is empty\", function () {",
+									"    pm.expect(pm.response.text()).to.be.empty;",
+									"});",
+									"",
+									"console.log(\"Tarea eliminada con ID: \" + pm.collectionVariables.get(\"task_id\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/tasks/api/v1/tasks/{{task_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tasks",
+								"api",
+								"v1",
+								"tasks",
+								"{{task_id}}",
+								""
+							]
+						},
+						"description": "Elimina permanentemente una tarea del sistema.\n\n**Parámetros:**\n- `task_id`: ID de la tarea (en la URL)\n\n**Respuesta esperada:** \n- Status 204 (No Content)\n- Sin body en la respuesta\n\n**Errores posibles:**\n- 404: Tarea no encontrada\n\n**⚠️ Advertencia:** Esta acción es permanente y no se puede deshacer."
+					},
+					"response": []
+				}
+			],
+			"description": "Operaciones CRUD completas para la gestión de tareas.\n\n**Orden recomendado de ejecución:**\n1. Listar todas las tareas (ver estado inicial)\n2. Crear nueva tarea (guarda el ID automáticamente)\n3. Obtener la tarea creada\n4. Actualizar completa (PUT) o parcial (PATCH)\n5. Listar todas las tareas (ver cambios)\n6. Eliminar tarea\n7. Listar todas las tareas (verificar eliminación)"
+		},
+		{
+			"name": "Examples - Casos de uso",
+			"item": [
+				{
+					"name": "Crear tarea sin descripción",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Tarea simple\",\n    \"done\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/tasks/api/v1/tasks/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tasks",
+								"api",
+								"v1",
+								"tasks",
+								""
+							]
+						},
+						"description": "Ejemplo: Crear tarea con solo el título (descripción opcional)."
+					},
+					"response": []
+				},
+				{
+					"name": "Marcar tarea como completada",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"done\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/tasks/api/v1/tasks/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tasks",
+								"api",
+								"v1",
+								"tasks",
+								"1",
+								""
+							]
+						},
+						"description": "Ejemplo: Marcar una tarea como completada sin modificar otros campos."
+					},
+					"response": []
+				},
+				{
+					"name": "Cambiar solo el título",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Título actualizado\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/tasks/api/v1/tasks/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tasks",
+								"api",
+								"v1",
+								"tasks",
+								"1",
+								""
+							]
+						},
+						"description": "Ejemplo: Actualizar solo el título de una tarea."
+					},
+					"response": []
+				},
+				{
+					"name": "Crear múltiples tareas",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Tarea de ejemplo {{$randomInt}}\",\n    \"description\": \"Esta es una tarea de prueba generada automáticamente\",\n    \"done\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/tasks/api/v1/tasks/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tasks",
+								"api",
+								"v1",
+								"tasks",
+								""
+							]
+						},
+						"description": "Ejemplo: Crear tarea con título aleatorio (útil para testing).\n\nEjecuta esta petición varias veces para crear múltiples tareas con títulos únicos."
+					},
+					"response": []
+				}
+			],
+			"description": "Ejemplos de casos de uso comunes y patrones de uso de la API."
+		},
+		{
+			"name": "Error Cases - Validaciones",
+			"item": [
+				{
+					"name": "Error: Título vacío",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Error message present\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('title');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"\",\n    \"done\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/tasks/api/v1/tasks/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tasks",
+								"api",
+								"v1",
+								"tasks",
+								""
+							]
+						},
+						"description": "Prueba de validación: Intenta crear una tarea sin título.\n\n**Resultado esperado:** Error 400 (Bad Request)"
+					},
+					"response": []
+				},
+				{
+					"name": "Error: Tarea no encontrada",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"pm.test(\"Error message is 'Not found.'\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.detail).to.eql(\"Not found.\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/tasks/api/v1/tasks/99999/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tasks",
+								"api",
+								"v1",
+								"tasks",
+								"99999",
+								""
+							]
+						},
+						"description": "Prueba de error: Intenta obtener una tarea que no existe.\n\n**Resultado esperado:** Error 404 (Not Found)"
+					},
+					"response": []
+				},
+				{
+					"name": "Error: Título muy largo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Este es un título extremadamente largo que supera el límite de 200 caracteres permitidos por el modelo de Django. Este es un título extremadamente largo que supera el límite de 200 caracteres permitidos por el modelo de Django. Más texto para superar el límite.\",\n    \"done\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/tasks/api/v1/tasks/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tasks",
+								"api",
+								"v1",
+								"tasks",
+								""
+							]
+						},
+						"description": "Prueba de validación: Intenta crear una tarea con título mayor a 200 caracteres.\n\n**Resultado esperado:** Error 400 (Bad Request)"
+					},
+					"response": []
+				}
+			],
+			"description": "Casos de prueba para validar el manejo de errores de la API.\n\nEstas peticiones deben fallar y devolver errores apropiados."
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "task_id",
+			"value": "1",
+			"type": "string"
+		}
+	]
+}
+
