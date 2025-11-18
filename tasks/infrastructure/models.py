@@ -1,14 +1,18 @@
+"""
+Infrastructure Layer: Models
+
+Modelos de Django para persistencia.
+Estos modelos son detalles técnicos de infraestructura.
+"""
 from django.db import models
 
-# Create your models here.
+
 class Task(models.Model):
     """
-    Modelo para representar una tarea en el sistema de gestión de tareas.
+    Modelo Task para persistencia en base de datos.
 
-    Attributes:
-        title (str): Título de la tarea (máximo 200 caracteres)
-        description (str): Descripción detallada de la tarea (opcional)
-        done (bool): Estado de completitud de la tarea (por defecto False)
+    Este modelo es un detalle de infraestructura.
+    La entidad real del dominio está en tasks.domain.Task
     """
     title = models.CharField(
         max_length=200,
@@ -29,6 +33,4 @@ class Task(models.Model):
     class Meta:
         verbose_name = "Tarea"
         verbose_name_plural = "Tareas"
-        ordering = ['-id']  # Más recientes primero
-
-
+        ordering = ['-id']
