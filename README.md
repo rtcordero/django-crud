@@ -6,9 +6,11 @@ API REST desarrollada con Django y Django REST Framework para la gestión de tar
 
 Este proyecto implementa una API RESTful completa para gestionar tareas, permitiendo realizar operaciones CRUD (Crear, Leer, Actualizar, Eliminar) sobre un modelo de tareas. La API incluye documentación automática y está configurada con CORS para integrarse con aplicaciones frontend.
 
-> 🚀 **¿Quieres empezar YA?** Consulta [INICIO_RAPIDO.md](INICIO_RAPIDO.md) - ¡En marcha en 5 minutos!
+> 🚀 **¿Quieres empezar YA?** Consulta [docs/INICIO_RAPIDO.md](docs/INICIO_RAPIDO.md) - ¡En marcha en 5 minutos!
 
-> 🎓 **¿Nuevo en Django?** Consulta la [Guía Visual para Principiantes](GUIA_VISUAL.md) para entender cómo funciona el código paso a paso.
+> 🎓 **¿Nuevo en Django?** Consulta la [Guía Visual para Principiantes](docs/GUIA_VISUAL.md) para entender cómo funciona el código paso a paso.
+
+> 📚 **Toda la documentación** está organizada en el directorio [docs/](docs/README.md) - ¡Consulta el índice completo!
 
 ## 🚀 Características
 
@@ -25,7 +27,7 @@ Este proyecto implementa una API RESTful completa para gestionar tareas, permiti
 - **Django 5.2.8**
 - **Django REST Framework**
 - **django-cors-headers**
-- **coreapi** (para documentación)
+- **drf-spectacular** (para documentación)
 - **SQLite** (base de datos)
 
 ## 📦 Instalación
@@ -89,7 +91,7 @@ La API estará disponible en `http://localhost:8000`
    - Inicia sesión con tu superusuario
    - Crea algunas tareas de prueba
 
-> 📖 **Guía completa de Swagger:** Consulta [SWAGGER_GUIDE.md](SWAGGER_GUIDE.md) para aprender a usar la documentación interactiva.
+> 📖 **Guía completa de Swagger:** Consulta [docs/SWAGGER_GUIDE.md](docs/SWAGGER_GUIDE.md) para aprender a usar la documentación interactiva.
 
 ## 🎨 Documentación Interactiva (Swagger / OpenAPI 3.0)
 
@@ -124,7 +126,7 @@ Una vez el servidor esté ejecutándose:
 
 **Sin escribir código**, puedes probar toda la API interactivamente.
 
-> 📚 **Guía completa:** [SWAGGER_GUIDE.md](SWAGGER_GUIDE.md) - Aprende a usar Swagger UI, ReDoc y personalizar la documentación.
+> 📚 **Guía completa:** [docs/SWAGGER_GUIDE.md](docs/SWAGGER_GUIDE.md) - Aprende a usar Swagger UI, ReDoc y personalizar la documentación.
 
 ## 📚 Estructura del Proyecto
 
@@ -134,10 +136,19 @@ django-crud/
 │   ├── settings.py           # Configuración de Django
 │   ├── urls.py               # URLs principales
 │   └── wsgi.py               # Configuración WSGI
-├── tasks/                    # Aplicación de tareas
-│   ├── models.py             # Modelo Task
-│   ├── serializer.py         # Serializador de Task
-│   ├── views.py              # Vistas de la API
+├── tasks/                    # Aplicación de tareas (Arquitectura DDD)
+│   ├── domain/               # Domain Layer - Lógica pura de negocio
+│   │   ├── entities.py       # Entidades (Task)
+│   │   └── exceptions.py     # Excepciones de negocio
+│   ├── application/          # Application Layer - Casos de uso
+│   │   ├── services.py       # Servicios (TaskService)
+│   │   └── dto.py            # Data Transfer Objects
+│   ├── infrastructure/       # Infrastructure Layer - Persistencia
+│   │   ├── models.py         # Modelos Django para BD
+│   │   └── repositories.py   # Repository pattern
+│   ├── api/                  # API Layer - HTTP/REST
+│   │   ├── views.py          # ViewSets de DRF
+│   │   └── serializers.py    # Serializers de DRF
 │   ├── urls.py               # URLs de la API
 │   └── admin.py              # Configuración del admin
 ├── db.sqlite3                # Base de datos SQLite
@@ -147,115 +158,174 @@ django-crud/
 
 ## 🏗️ Arquitectura y Flujo de Datos
 
-### Cómo interactúan los componentes
+### ⭐ Arquitectura Domain-Driven Design (DDD)
+
+El proyecto implementa una **arquitectura en capas desacoplada** que separa responsabilidades:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                         CLIENTE (Frontend/curl)                  │
-└────────────────────────────────┬────────────────────────────────┘
-                                 │ HTTP Request
-                                 ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    django_crud_api/urls.py                       │
-│              (Enrutador principal del proyecto)                  │
-│         path('tasks/', include('tasks.urls'))                    │
+│                      CLIENTE (HTTP Request)                      │
 └────────────────────────────────┬────────────────────────────────┘
                                  │
                                  ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                        tasks/urls.py                             │
-│              (Enrutador de la app de tareas)                     │
-│    router.register(r'tasks', TaskView, 'tasks')                  │
-└────────────────────────────────┬────────────────────────────────┘
-                                 │
-                                 ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                        tasks/views.py                            │
-│              TaskView(viewsets.ModelViewSet)                     │
-│          - Gestiona las peticiones HTTP                          │
-│          - Define las operaciones CRUD                           │
-└────────────────┬────────────────────────────┬───────────────────┘
-                 │                            │
-                 │ Usa                        │ Usa
-                 ▼                            ▼
-┌──────────────────────────────┐  ┌──────────────────────────────┐
-│   tasks/serializer.py        │  │     tasks/models.py          │
-│   TaskSerializer             │  │     Task Model               │
-│   - Convierte datos entre    │  │     - Define estructura      │
-│     JSON y modelo Python     │◄─┤       de la tabla            │
-│   - Valida datos             │  │     - Interactúa con DB      │
-└──────────────────────────────┘  └────────────┬─────────────────┘
-                                               │
-                                               │ ORM
-                                               ▼
-                                  ┌─────────────────────────┐
-                                  │     db.sqlite3          │
-                                  │   (Base de datos)       │
-                                  └─────────────────────────┘
+         ┌───────────────────────────────────────────────┐
+         │         API LAYER (tasks/api/)                │
+         │    Validación HTTP, Serialización             │
+         │  ✓ views.py - TaskViewSet                    │
+         │  ✓ serializers.py - Serializers DRF          │
+         └────────────────┬────────────────────────────┘
+                          │
+                          ▼
+         ┌───────────────────────────────────────────────┐
+         │    APPLICATION LAYER (tasks/application/)    │
+         │    Casos de Uso, Orquestación                │
+         │  ✓ services.py - TaskService                 │
+         │  ✓ dto.py - Data Transfer Objects            │
+         └────────────────┬────────────────────────────┘
+                          │
+                          ▼
+         ┌───────────────────────────────────────────────┐
+         │      DOMAIN LAYER (tasks/domain/)            │
+         │    Lógica Pura de Negocio                    │
+         │  ✓ entities.py - Task (entidad pura)        │
+         │  ✓ exceptions.py - Excepciones negocio      │
+         └────────────────┬────────────────────────────┘
+                          │
+                          ▼
+         ┌───────────────────────────────────────────────┐
+         │ INFRASTRUCTURE LAYER (tasks/infrastructure/)  │
+         │    Persistencia, BD, ORM                      │
+         │  ✓ models.py - Task Model (Django)          │
+         │  ✓ repositories.py - Repository Pattern      │
+         └────────────────┬────────────────────────────┘
+                          │
+                          ▼
+                  ┌─────────────────┐
+                  │  db.sqlite3     │
+                  │  (Base de Datos)│
+                  └─────────────────┘
 ```
 
-### Flujo de una petición típica (Ejemplo: GET /tasks/api/v1/tasks/)
+**¿Por qué DDD?** Consulta [ARQUITECTURA_DDD.md](docs/ARQUITECTURA_DDD.md) para detalles completos.
 
-1. **Cliente** → Hace una petición HTTP GET a `/tasks/api/v1/tasks/`
+### Flujo de una petición típica (Ejemplo: POST /tasks/api/v1/tasks/)
 
-2. **django_crud_api/urls.py** → Recibe la petición y la redirige a `tasks.urls`
+```
+1. CLIENTE
+   └─→ POST /tasks/api/v1/tasks/
+       {"title": "Comprar leche", "description": "Ir al super"}
 
-3. **tasks/urls.py** → El router identifica que debe usar `TaskView` para `/tasks/`
+2. API LAYER (tasks/api/views.py - TaskViewSet.create)
+   └─→ Validar con CreateTaskSerializer
+   └─→ Convertir a CreateTaskDTO
+   └─→ Llamar al servicio
 
-4. **tasks/views.py (TaskView)** → 
-   - Ejecuta el método `list()` (heredado de ModelViewSet)
-   - Consulta `Task.objects.all()` al modelo
+3. APPLICATION LAYER (tasks/application/services.py - TaskService.create_task)
+   └─→ Crear entidad Task(title, description)
+   └─→ Llamar al repositorio para persistir
+   └─→ Convertir respuesta a TaskResponseDTO
 
-5. **tasks/models.py (Task)** → 
-   - Django ORM traduce la consulta a SQL
-   - Recupera los datos de `db.sqlite3`
+4. INFRASTRUCTURE LAYER (tasks/infrastructure/repositories.py - DjangoTaskRepository)
+   └─→ Convertir Task entity a TaskModel (Django)
+   └─→ Guardar en BD con Django ORM
+   └─→ Convertir TaskModel de vuelta a Task entity
 
-6. **tasks/serializer.py (TaskSerializer)** → 
-   - Convierte los objetos Python en formato JSON
-   - Valida y estructura los datos
+5. Regresa por las capas
+   ├─→ TaskService retorna TaskResponseDTO
+   ├─→ TaskViewSet serializa con TaskSerializer
+   └─→ Response HTTP 201 Created con JSON
 
-7. **Respuesta** → Los datos JSON se envían de vuelta al cliente
+6. CLIENTE
+   └─→ {"id": 1, "title": "Comprar leche", "done": false}
+```
 
-### Componentes clave explicados
+### Componentes por Capa
 
-#### 🗂️ models.py (Modelo de Datos)
+#### 🎯 Domain Layer (Lógica Pura)
 ```python
-class Task(models.Model):
-    title = models.CharField(max_length=200)
-    description = models.TextField(blank=True)
-    done = models.BooleanField(default=False)
-```
-**Función**: Define la estructura de la tabla en la base de datos. Cada atributo es una columna.
+# tasks/domain/entities.py
+@dataclass
+class Task:
+    title: str
+    description: str = ""
+    done: bool = False
+    id: Optional[int] = None
 
-#### 🔄 serializer.py (Traductor)
-```python
-class TaskSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Task
-        fields = ['id', 'title', 'description', 'done']
+    def mark_as_done(self) -> None:
+        """Marca la tarea como completada."""
+        self.done = True
 ```
-**Función**: Convierte entre objetos Python (Task) y JSON. Valida los datos de entrada/salida.
 
-#### 🎮 views.py (Controlador)
-```python
-class TaskView(viewsets.ModelViewSet):
-    serializer_class = TaskSerializer
-    queryset = Task.objects.all()
-```
-**Función**: Gestiona la lógica de negocio. ModelViewSet incluye automáticamente:
-- `list()` → GET /tasks/ (listar todas)
-- `create()` → POST /tasks/ (crear nueva)
-- `retrieve()` → GET /tasks/1/ (obtener una)
-- `update()` → PUT /tasks/1/ (actualizar completa)
-- `partial_update()` → PATCH /tasks/1/ (actualizar parcial)
-- `destroy()` → DELETE /tasks/1/ (eliminar)
+**Características:**
+- ✅ Sin dependencias de Django
+- ✅ Fácil de testear
+- ✅ Lógica de negocio pura
+- ✅ No importa de otras capas
 
-#### 🛣️ urls.py (Enrutador)
+#### 🔧 Application Layer (Casos de Uso)
 ```python
-router = routers.DefaultRouter()
-router.register(r'tasks', TaskView, 'tasks')
+# tasks/application/services.py
+class TaskService:
+    def __init__(self, repository: TaskRepository):
+        self.repository = repository
+
+    def create_task(self, dto: CreateTaskDTO) -> TaskResponseDTO:
+        task = Task(title=dto.title, description=dto.description)
+        saved_task = self.repository.save(task)
+        return TaskResponseDTO(id=saved_task.id, ...)
 ```
-**Función**: Mapea las URLs a las vistas. El router automáticamente crea todas las rutas necesarias.
+
+**Características:**
+- ✅ Orquesta lógica del dominio
+- ✅ Usa inyección de dependencias
+- ✅ Convierte entre entidades y DTOs
+
+#### 🏢 Infrastructure Layer (Persistencia)
+```python
+# tasks/infrastructure/repositories.py
+class DjangoTaskRepository(TaskRepository):
+    def save(self, task: Task) -> Task:
+        model = TaskModel(title=task.title, ...)
+        model.save()
+        return self._model_to_entity(model)
+```
+
+**Características:**
+- ✅ Implementa Repository pattern
+- ✅ Convierte entre modelos Django y entidades
+- ✅ Puedes cambiar de BD sin tocar otras capas
+
+#### 🌐 API Layer (HTTP/REST)
+```python
+# tasks/api/views.py
+class TaskViewSet(viewsets.ViewSet):
+    def create(self, request):
+        serializer = CreateTaskSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        dto = CreateTaskDTO(**serializer.validated_data)
+        task = self.service.create_task(dto)
+        return Response(TaskSerializer(task).data, status=201)
+```
+
+**Características:**
+- ✅ Maneja HTTP y serialización
+- ✅ Delega lógica al servicio
+- ✅ Valida entrada con Serializers
+
+### Endpoints Disponibles
+
+Todos los endpoints están disponibles en `/tasks/api/v1/tasks/`:
+
+| Método | URL | Acción |
+|--------|-----|--------|
+| GET | `/tasks/api/v1/tasks/` | Listar todas las tareas |
+| POST | `/tasks/api/v1/tasks/` | Crear nueva tarea |
+| GET | `/tasks/api/v1/tasks/{id}/` | Obtener una tarea |
+| PUT | `/tasks/api/v1/tasks/{id}/` | Actualizar tarea (completa) |
+| PATCH | `/tasks/api/v1/tasks/{id}/` | Actualizar tarea (parcial) |
+| PATCH | `/tasks/api/v1/tasks/{id}/mark_done/` | Marcar como completada |
+| PATCH | `/tasks/api/v1/tasks/{id}/mark_pending/` | Marcar como pendiente |
+| DELETE | `/tasks/api/v1/tasks/{id}/` | Eliminar tarea |
 
 ### Ejemplo práctico: Crear una tarea
 
@@ -271,13 +341,20 @@ Content-Type: application/json
 }
 ```
 
-**2. Flujo interno:**
-- URLs → Enruta a `TaskView.create()`
-- Serializer → Valida el JSON
-- View → Llama a `Task.objects.create()`
-- Model → Inserta en la base de datos
-- Serializer → Convierte el objeto guardado a JSON
-- Response → Devuelve status 201 con los datos
+**2. Flujo interno (con DDD):**
+```
+API Layer → CreateTaskSerializer valida el JSON
+           → Convierte a CreateTaskDTO
+
+Application Layer → TaskService.create_task(dto)
+                  → Crea entidad Task pura
+
+Infrastructure Layer → DjangoTaskRepository.save(task)
+                      → Guarda en BD con Django ORM
+
+Response → Serializa con TaskSerializer
+         → Devuelve status 201 Created
+```
 
 **3. Respuesta al cliente:**
 ```json
@@ -349,7 +426,7 @@ pip uninstall nombre-paquete
 - `Django==5.2.8` - Framework web principal
 - `djangorestframework==3.16.1` - Para crear la API REST
 - `django-cors-headers==4.9.0` - Gestión de CORS para frontend
-- `coreapi==2.3.3` - Documentación automática de la API
+- `drf-spectacular====0.29.0` - Documentación automática de la API
 
 ## 🔌 API Endpoints
 
@@ -625,13 +702,13 @@ Los errores aparecen en la consola donde ejecutaste `runserver`. Para logs más 
 ### 📚 Documentación del proyecto
 
 #### Para probar la API:
-- **[Guía de Swagger/OpenAPI](SWAGGER_GUIDE.md)** ⭐ **NUEVO**
+- **[Guía de Swagger/OpenAPI](docs/SWAGGER_GUIDE.md)** ⭐ **NUEVO**
   - Cómo usar Swagger UI y ReDoc
   - Comparación con alternativas (drf-yasg, CoreAPI)
   - Personalización y configuración
   - Testing interactivo desde el navegador
   
-- **[Guía de Postman](POSTMAN_GUIDE.md)** 
+- **[Guía de Postman](docs/POSTMAN_GUIDE.md)** 
   - Cómo importar y usar la colección
   - Guía completa de cada endpoint
   - Variables y tests automáticos
@@ -645,14 +722,14 @@ Los errores aparecen en la consola donde ejecutaste `runserver`. Para logs más 
   - Ejemplos prácticos y ejercicios
 
 #### Para consulta rápida:
-- **[Referencia Rápida](REFERENCIA_RAPIDA.md)** 
+- **[Referencia Rápida](docs/REFERENCIA_RAPIDA.md)** 
   - Cheat sheet con diagramas ASCII
   - Comandos Django más usados
   - Queries comunes del ORM
   - Solución a errores comunes
 
 #### Para entender el flujo detallado:
-- **[Diagramas de Secuencia](DIAGRAMAS_SECUENCIA.md)** 
+- **[Diagramas de Secuencia](docs/DIAGRAMAS_SECUENCIA.md)** 
   - Flujo detallado de cada operación CRUD
   - Diagramas de secuencia para GET, POST, PUT, PATCH, DELETE
   - Códigos HTTP explicados

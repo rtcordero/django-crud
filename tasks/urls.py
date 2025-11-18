@@ -2,10 +2,10 @@ from django.urls import path, include
 from rest_framework import routers
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 
-from tasks.views import TaskView
+from tasks.api import TaskViewSet
 
 router = routers.DefaultRouter()
-router.register(r'tasks', TaskView, 'tasks')
+router.register(r'tasks', TaskViewSet, 'tasks')
 
 urlpatterns = [
     # API endpoints

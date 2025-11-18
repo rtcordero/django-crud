@@ -197,35 +197,59 @@ pip list | grep spectacular
 python manage.py check
 ```
 
-## 📊 Estructura del Proyecto
+## 📊 Estructura del Proyecto (Arquitectura DDD)
 
 ```
 django-crud/
-├── manage.py                    # Script principal de Django
-├── requirements.txt             # Dependencias
-├── db.sqlite3                   # Base de datos
-├── README.md                    # 📖 Documentación principal
-├── SWAGGER_GUIDE.md            # 🎨 Guía de Swagger
-├── POSTMAN_GUIDE.md            # 📮 Guía de Postman
-├── postman_collection.json     # Colección de Postman
-├── GUIA_VISUAL.md              # 👨‍🎓 Para principiantes
-├── REFERENCIA_RAPIDA.md        # ⚡ Cheat sheet
-├── DIAGRAMAS_SECUENCIA.md      # 🔄 Flujos detallados
-├── INDICE_DOCUMENTACION.md     # 🗺️ Navegación
+├── manage.py                       # Script principal de Django
+├── requirements.txt                # Dependencias
+├── db.sqlite3                      # Base de datos
+├── README.md                       # 📖 Documentación principal
+├── postman_collection.json         # Colección de Postman
 │
-├── django_crud_api/            # Configuración del proyecto
-│   ├── settings.py            # ⚙️ Configuración
-│   ├── urls.py                # 🛣️ URLs principales
+├── docs/                           # 📚 Documentación
+│   ├── README.md                  # 🗺️ Índice de documentación
+│   ├── ARQUITECTURA_DDD.md        # 🏗️ Explicación del diseño
+│   ├── GUIA_VISUAL.md             # 👨‍🎓 Para principiantes
+│   ├── DIAGRAMAS_SECUENCIA.md     # 🔄 Flujos detallados
+│   ├── REFERENCIA_RAPIDA.md       # ⚡ Cheat sheet
+│   ├── SWAGGER_GUIDE.md           # 🎨 Guía de Swagger
+│   └── POSTMAN_GUIDE.md           # 📮 Guía de Postman
+│
+├── django_crud_api/                # Configuración del proyecto
+│   ├── settings.py                # ⚙️ Configuración
+│   ├── urls.py                    # 🛣️ URLs principales
 │   └── wsgi.py
 │
-└── tasks/                      # App de tareas
-    ├── models.py              # 📊 Modelo Task
-    ├── serializer.py          # 🔄 Serializer
-    ├── views.py               # 🎮 Vistas/ViewSet
-    ├── urls.py                # 🛣️ URLs de la app
-    ├── admin.py               # 🔧 Config admin
-    └── migrations/            # 📦 Migraciones
+└── tasks/                          # App de tareas (DDD 4 Capas)
+    ├── domain/                     # 🎯 Domain Layer (Lógica pura)
+    │   ├── entities.py           # Entidades (Task)
+    │   ├── exceptions.py         # Excepciones de negocio
+    │   └── __init__.py
+    │
+    ├── application/                # 🔧 Application Layer (Casos de uso)
+    │   ├── services.py           # TaskService
+    │   ├── dto.py                # DTOs
+    │   └── __init__.py
+    │
+    ├── infrastructure/             # 🏢 Infrastructure Layer (Persistencia)
+    │   ├── models.py             # Modelos Django (para BD)
+    │   ├── repositories.py       # Repository Pattern
+    │   └── __init__.py
+    │
+    ├── api/                        # 🌐 API Layer (HTTP/REST)
+    │   ├── views.py              # TaskViewSet
+    │   ├── serializers.py        # Serializers DRF
+    │   └── __init__.py
+    │
+    ├── urls.py                     # 🛣️ URLs de la app
+    ├── admin.py                    # 🔧 Config admin
+    ├── migrations/                 # 📦 Migraciones Django
+    ├── tests.py                    # 🧪 Tests
+    └── __init__.py
 ```
+
+**Nota:** Toda la documentación está en la carpeta `docs/`. Ve allí para aprender el proyecto.
 
 ## 🎓 Aprendizaje Progresivo
 
